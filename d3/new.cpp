@@ -22,11 +22,19 @@ int ifNumBetween(int x, int num1, int num2)
 	}
 }
 
+int abs(int n)
+{
+	if (n < 0) return -n;
+	else return n;
+}
+
 struct Point {
 	Point() {}
-	Point(int x, int y) : x(x),y(y) {}
+	Point(int x, int y) : x(x),y(y), moves(0) {}
+	Point(int x, int y, int moves) : x(x),y(y), moves(moves) {}
 	int x;
 	int y;
+	int moves;
 };
 vector<Point> collisions;
 
@@ -45,14 +53,18 @@ void findCollisions(vector<Point> w1, vector<Point> w2)
 			if (w1[i-1].x == w1[i].x) {
 				if ((ifNumBetween(w1[i].x, w2[j-1].x, w2[j].x)) && (ifNumBetween(w2[j].y, w1[i-1].y, w1[i].y))) {
 					Point p(w1[i].x, w2[j].y);
-					printf("collision at point [%d, %d]\n", p.x, p.y);
+					p.moves = w1[i].moves + w2[j].moves;
+					p.moves = p.moves - abs(w2[j].x - p.x) - abs(w1[i].y - p.y);
+					printf("collision at point [%d, %d], moves: %d\n", p.x, p.y, p.moves);
 					collisions.push_back(p);
 				}
 			}
 			if (w1[i-1].y == w1[i].y) {
 				if ((ifNumBetween(w1[i].y, w2[j-1].y, w2[j].y)) && (ifNumBetween(w2[j].x, w1[i-1].x, w1[i].x))) {
 					Point p(w2[j].x, w1[i].y);
-					printf("collision at point [%d, %d]\n", p.x, p.y);
+					p.moves = w1[i].moves + w2[j].moves;
+					p.moves = p.moves - abs(w1[i].x - p.x) - abs(w2[j].y - p.y);
+					printf("collision at point [%d, %d], moves: %d\n", p.x, p.y, p.moves);
 					collisions.push_back(p);
 				}
 			}
@@ -60,11 +72,6 @@ void findCollisions(vector<Point> w1, vector<Point> w2)
 	}
 }
 
-int abs(int n)
-{
-	if (n < 0) return -n;
-	else return n;
-}
 
 void getPoints(char *command, vector<Point> &points)
 {
@@ -77,6 +84,7 @@ void getPoints(char *command, vector<Point> &points)
 	}
 
 	Point p = points.back();
+	p.moves = p.moves + value;
 	switch(dir) {
 	case 'R':
 		p.x = p.x + value;
@@ -117,9 +125,7 @@ int main()
 
 	vector<Point> w1Points;
 	vector<Point> w2Points;
-	Point start;
-	start.x = 0;
-	start.y = 0;
+	Point start(0,0);
 	w1Points.push_back(start);
 	w2Points.push_back(start);
 
@@ -143,6 +149,14 @@ int main()
 			closest = abs(p.x) + abs(p.y);
 		}
 	}
-	printf("%d\n", closest);
+	printf("manhattan closest: %d\n", closest);
+
+	closest = 9000000;
+	for (Point p : collisions) {
+		if (p.moves < closest) {
+			closest = p.moves;
+		}
+	}
+	printf("moves closest: %d\n", closest);
 
 }
