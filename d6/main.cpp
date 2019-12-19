@@ -7,10 +7,9 @@ using namespace std;
 //TODO orbited by and orbitting is the same thing, its just a graph theory problem, just fix it today
 
 struct Planet {
-	Planet(string name, Planet *orbit) : name(name), orbit(orbit) {}
+	Planet(string name) : name(name) {}
 	string name;
-	Planet *orbit;
-	vector<Planet*> orbitedBy;
+	vector<Planet*> linkedBy;
 };
 
 vector<Planet*> plants;
@@ -33,22 +32,16 @@ void parseInput(string inp) {
 		}
 	}
 	if (!p1) {
-		p1 = new Planet(str1, nullptr);
+		p1 = new Planet(str1);
 		plants.push_back(p1);
 	}
 	if (!p2) {
-		p2 = new Planet(str2, p1);
+		p2 = new Planet(str2);
 		plants.push_back(p2);
-		p1->orbitedBy.push_back(p2);
-	} else {
-		p2->orbit = p1;
-		p1->orbitedBy.push_back(p2);
-	}
-}
+	} 
+	p1->linkedBy.push_back(p2);
+	p2->linkedBy.push_back(p1);
 
-int countOrbits(Planet *p, int n) {
-	if (p->orbit == nullptr) return n;
-	else return countOrbits(p->orbit, n+1);
 }
 
 void freePlants() {
@@ -57,9 +50,24 @@ void freePlants() {
 	}
 }
 
-int findSanta (Planet *you) {
-	
+int findSanta (Planet *p, int steps) {
+	cout << "checking planet: " << p->name << endl;
+	cout << "neighbours: ";
+	for (Planet *P : p->linkedBy){
+		cout << P->name << ",";
+	}
+	cout << endl;
+	if (p->name == "SAN") return steps;
+	p->name == "";
+	for (Planet *P : p->linkedBy){
+		if (P->name != ""){
+			//steps = findSanta(P, steps+1);
+		}
+	}
+	return steps;
 }
+
+
 
 int main() {
 	cin.tie(0);
@@ -69,16 +77,16 @@ int main() {
 	while (!cin.eof()) {
 		cin >> str;
 		parseInput(str);
-		i++;
 	}
-	cout << i;
-	
+	int n = 0;
 	for (Planet *p : plants) {
 		if (p->name == "YOU") {
-			cout << findSanta(p);
+			cout << p->name;
+			n = findSanta(p, 0);
 			break;
 		}
 	}
+	cout << n << endl;
 
 	freePlants();
 }
