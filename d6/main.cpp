@@ -9,12 +9,12 @@ using namespace std;
 struct Planet {
 	Planet(string name) : name(name) {}
 	string name;
-	vector<Planet*> linkedBy;
+	vector<Planet*> neighbours;
 };
 
-vector<Planet*> plants;
+static int found = 0;
 
-void parseInput(string inp) {
+void parseInput(string inp, vector<Planet*> &plants) {
 	string str1;
 	string str2;
 
@@ -39,32 +39,23 @@ void parseInput(string inp) {
 		p2 = new Planet(str2);
 		plants.push_back(p2);
 	} 
-	p1->linkedBy.push_back(p2);
-	p2->linkedBy.push_back(p1);
+	p1->neighbours.push_back(p2);
+	p2->neighbours.push_back(p1);
 
 }
 
-void freePlants() {
-	for (Planet *p : plants) {
-		delete p;
-	}
-}
 
-int findSanta (Planet *p, int steps) {
-	cout << "checking planet: " << p->name << endl;
-	cout << "neighbours: ";
-	for (Planet *P : p->linkedBy){
-		cout << P->name << ",";
+void findSanta (Planet *p, int depth) {
+	//cout << "checking planet: " << p->name;
+	//cout << " depth: " << depth << endl;
+	if (p->name == "SAN") {
+		if (depth < found || found == 0) found = depth;
+		return;
 	}
-	cout << endl;
-	if (p->name == "SAN") return steps;
-	p->name == "";
-	for (Planet *P : p->linkedBy){
-		if (P->name != ""){
-			//steps = findSanta(P, steps+1);
-		}
+	p->name.clear();
+	for (Planet *homie : p->neighbours) {
+		if (!homie->name.empty()) findSanta(homie, depth+1);
 	}
-	return steps;
 }
 
 
@@ -74,19 +65,36 @@ int main() {
 	std::string str;
 	int i = 0;
 
+	vector<Planet*> plants;
 	while (!cin.eof()) {
 		cin >> str;
-		parseInput(str);
+		parseInput(str, plants);
 	}
 	int n = 0;
 	for (Planet *p : plants) {
+		//cout << p->name << ") neighbours: ";
+		//for (Planet *pp : p->neighbours) {
+		//	cout << pp->name << ",";
+		//}
+		//cout << endl;
+	}
+	plants.pop_back();
+	for (Planet *p : plants) {
+		//cout << p->name << ") neighbours: ";
+		//for (Planet *pp : p->neighbours) {
+		//	cout << pp->name << ",";
+		//}
+		//cout << endl;
 		if (p->name == "YOU") {
-			cout << p->name;
-			n = findSanta(p, 0);
-			break;
+			//cout << p->name << endl;
+			findSanta(p, 0);
+			//break;
 		}
 	}
-	cout << n << endl;
+	
+	cout << found-2 << endl;
 
-	freePlants();
+	for (Planet *p : plants) {
+		delete p;
+	}
 }
