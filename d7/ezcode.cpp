@@ -8,6 +8,7 @@
 using namespace std;
 
 void intcode(vector<int> &rom);
+vector<int> intcode(vector<int> &rom, vector<int> &inputs);
 
 static int ip = 0;
 vector<int> rom;
@@ -58,6 +59,153 @@ int main(int argc, char* argv[]) {
 		val = 10*val+c-'0';
 	}
 	intcode(rom);
+	
+	for (int i = 0; i < 120; i++) {
+		
+	}
+}
+
+vector<int> intcode(vector<int> &rom, vector<int> &inputs) {
+	int param1 = 0;
+	int param2 = 0;
+	int loc = 0;
+	int ins;
+	vector<int> outputs;
+	int inpIT = 0;
+
+	while (ip < rom.size()) {
+		ins = rom[ip] % 100;
+		switch(ins){
+			case add:
+				if ( rom[ip] % 1000 > 100) {
+					param1 = rom[ip+1];
+				} else {
+					param1 = rom[rom[ip+1]];
+				}
+				if (rom[ip]%10000 > 1000) {
+					param2 = rom[ip+2];
+				} else {
+					param2 = rom[rom[ip+2]];
+				}
+				loc = rom[ip+3];
+				rom[loc] = param1 + param2;
+				ip = ip + 4;
+				break;
+			case mult:
+				if ( rom[ip] % 1000 > 100) {
+					param1 = rom[ip+1];
+				} else {
+					param1 = rom[rom[ip+1]];
+				}
+				if (rom[ip]%10000 > 1000) {
+					param2 = rom[ip+2];
+				} else {
+					param2 = rom[rom[ip+2]];
+				}
+				loc = rom[ip+3];
+				rom[loc] = param1 * param2;
+				ip = ip + 4;
+				break;
+			case inp:
+				int tmp;
+				//cin.tie(0);
+				//cout << "input number: ";
+				//cin >> tmp;
+				param1 = rom[ip+1];
+				rom[param1] = inputs[inpIT++];
+				ip = ip + 2;
+				break;
+			case out:
+				if (rom[ip] % 1000 > 100) {
+					param1 = rom[ip+1];
+				} else {
+					param1 = rom[rom[ip+1]];
+				}
+				//cout << "OUTPUT: " << param1 << endl;
+				outputs.push_back(param1);
+				ip = ip+2;
+				break;
+			case jit:
+				if ( rom[ip] % 1000 > 100) {
+					param1 = rom[ip+1];
+				} else {
+					param1 = rom[rom[ip+1]];
+				}
+				if (rom[ip]%10000 > 1000) {
+					param2 = rom[ip+2];
+				} else {
+					param2 = rom[rom[ip+2]];
+				}
+				if (param1 != 0) {
+					ip = param2;
+				} else {
+					ip = ip + 3;
+				}
+				break;
+			case jif:
+				if ( rom[ip] % 1000 > 100) {
+					param1 = rom[ip+1];
+				} else {
+					param1 = rom[rom[ip+1]];
+				}
+				if (rom[ip]%10000 > 1000) {
+					param2 = rom[ip+2];
+				} else {
+					param2 = rom[rom[ip+2]];
+				}
+				if (param1 == 0) {
+					ip = param2;
+				} else {
+					ip = ip + 3;
+				}
+				break;
+			case lt:
+				if ( rom[ip] % 1000 > 100) {
+					param1 = rom[ip+1];
+				} else {
+					param1 = rom[rom[ip+1]];
+				}
+				if (rom[ip]%10000 > 1000) {
+					param2 = rom[ip+2];
+				} else {
+					param2 = rom[rom[ip+2]];
+				}
+				loc = rom[ip+3];
+
+				if (param1 < param2) {
+					rom[loc] = 1;
+				} else {
+					rom[loc] = 0;
+				}
+				ip = ip + 4;
+				break;
+			case eq:
+				if ( rom[ip] % 1000 > 100) {
+					param1 = rom[ip+1];
+				} else {
+					param1 = rom[rom[ip+1]];
+				}
+				if (rom[ip]%10000 > 1000) {
+					param2 = rom[ip+2];
+				} else {
+					param2 = rom[rom[ip+2]];
+				}
+				loc = rom[ip+3];
+				if (param1 == param2) {
+					rom[loc] = 1;
+				} else {
+					rom[loc] = 0;
+				}
+				ip = ip + 4;
+				break;
+			case quit:
+				cout << "exit op" << endl;
+				return outputs;
+			default:
+				cout << "bad op: " << rom[ip] << endl;
+				return outputs;
+		}
+	}
 }
 
 void intcode(vector<int> &rom) {
