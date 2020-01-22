@@ -8,14 +8,31 @@
 using namespace std;
 
 void intcode(vector<int> &rom);
-vector<int> intcode(vector<int> &rom, vector<int> &inputs);
+int intcode(vector<int> rom, vector<int> &inputs);
 
-static int ip = 0;
 vector<int> rom;
+
+vector<vector<int>> permutations;
 
 enum ops {
 	add=1, mult=2, inp=3, out=4, quit=99, jit=5, jif=6, lt=7, eq=8
 };
+
+void HeapPermuts(vector<int> &arr, int size) {
+	if (size == 1) {
+		permutations.push_back(arr);
+		return;
+	}
+	for (int i = 0; i < size ; i++) {
+		HeapPermuts(arr, size-1);
+
+		if (size%2==1) {
+			swap(arr[0], arr[size-1]);
+		} else {
+			swap(arr[i], arr[size-1]);
+		}
+	}
+}
 
 int main(int argc, char* argv[]) {
 	cin.tie(0);
@@ -58,20 +75,34 @@ int main(int argc, char* argv[]) {
 		if (c == EOF) break;
 		val = 10*val+c-'0';
 	}
-	intcode(rom);
-	
-	for (int i = 0; i < 120; i++) {
-		
+	vector<int> arr = {0,1,2,3,4};
+	HeapPermuts(arr, arr.size());
+	int max = 0;
+
+	for (vector<int> p : permutations) {
+		int out = 0;
+		vector<int> inp(2);
+
+		for (int i = 0; i < p.size(); i++) {
+			inp = {p[i], out};
+			out = intcode(rom, inp);
+		}
+		if (out > max) {
+			max = out;
+		}
 	}
+	cout << max << endl;
+	
 }
 
-vector<int> intcode(vector<int> &rom, vector<int> &inputs) {
+int intcode(vector<int> rom, vector<int> &inputs) {
 	int param1 = 0;
 	int param2 = 0;
 	int loc = 0;
 	int ins;
-	vector<int> outputs;
 	int inpIT = 0;
+	int output = -99;
+	int ip = 0;
 
 	while (ip < rom.size()) {
 		ins = rom[ip] % 100;
@@ -122,7 +153,7 @@ vector<int> intcode(vector<int> &rom, vector<int> &inputs) {
 					param1 = rom[rom[ip+1]];
 				}
 				//cout << "OUTPUT: " << param1 << endl;
-				outputs.push_back(param1);
+				output = param1;
 				ip = ip+2;
 				break;
 			case jit:
@@ -199,13 +230,14 @@ vector<int> intcode(vector<int> &rom, vector<int> &inputs) {
 				ip = ip + 4;
 				break;
 			case quit:
-				cout << "exit op" << endl;
-				return outputs;
+				//cout << "exit op" << endl;
+				return output;
 			default:
-				cout << "bad op: " << rom[ip] << endl;
-				return outputs;
+				//cout << "bad op: " << rom[ip] << endl;
+				return -99;
 		}
 	}
+	return -99;
 }
 
 void intcode(vector<int> &rom) {
@@ -213,6 +245,7 @@ void intcode(vector<int> &rom) {
 	int param2 = 0;
 	int loc = 0;
 	int ins;
+	int ip = 0;
 
 	while (ip < rom.size()) {
 		ins = rom[ip] % 100;
