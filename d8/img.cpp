@@ -11,7 +11,7 @@ struct Stats {
 };
 
 struct Layer {
-	vector<int> data;
+	int data[6][25];
 	Stats stats;
 };
 
@@ -22,22 +22,23 @@ int main() {
 	Layer tmp;
 	tmp.stats = {0,0,0};
 	char c = getchar();
+	int iter = 0;
 	while (c != '\n') {
 		int val = c - '0';
-		if (tmp.data.size() < LSIZE-1) {
-			tmp.data.push_back(val);
+		if (iter < LSIZE-1) {
+			tmp.data[0][iter++] = val;
 		} else {
-			tmp.data.push_back(val);
+			tmp.data[0][iter++] = val;
 			layers.push_back(tmp);
-			tmp.data.clear();
+			iter = 0;
 		}
 		c = getchar();
 	}
 	int min = 150;
 	int minLayerID = 0;
 	for (int i = 0; i < layers.size(); i++) {
-		for (int x : layers[i].data) {
-			switch(x) {
+		for (int j = 0; j < 25*6; j++) {
+			switch(layers[i].data[0][j]) {
 				case 0:
 					layers[i].stats.zeros++;
 					break;
@@ -57,5 +58,30 @@ int main() {
 			minLayerID = i;
 		}
 	}
+	int endpic[6][25];
+
+	for (int j=0;j<6;j++) {
+		for (int i=0;i<25;i++) {
+			for (Layer l : layers) {
+				if (l.data[j][i] == 0) {
+					endpic[j][i] = l.data[j][i];
+					break;
+				}
+				if (l.data[j][i] == 1) {
+					endpic[j][i] = l.data[j][i];
+					break;
+				}
+			}
+		}
+	}
+
 	cout << layers[minLayerID].stats.ones * layers[minLayerID].stats.twos << endl;
+	for (int j=0;j<6;j++) {
+		for (int i=0;i<25;i++) {
+			if (endpic[j][i] == 1) cout << "#";
+			if (endpic[j][i] == 0) cout << " ";
+		}
+		cout << endl;
+	}
+	cout << endl;
 }
